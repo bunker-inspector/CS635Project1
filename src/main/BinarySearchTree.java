@@ -1,14 +1,16 @@
 package main;
 
+import java.util.AbstractCollection;
 import java.util.Collection;
 import java.util.Iterator;
 
 /**
  * Created by ted on 1/22/16.
  */
-public class BinarySearchTree<T> implements Iterable, Collection {
+public class BinarySearchTree<T> extends AbstractCollection implements Iterable {
 
     private Leaf root = null;
+    private int size = 0;
 
     class Leaf {
 
@@ -76,11 +78,33 @@ public class BinarySearchTree<T> implements Iterable, Collection {
         else {
             root.addLeaf(newValue);
         }
+        size++;
     }
 
     @Override
-    public Iterator iterator() {
-        return null;
+    public Iterator<T> iterator() {
+        return new BinarySearchTreeIterator();
+    }
+
+    private class BinarySearchTreeIterator implements Iterator{
+        BinarySearchTreeIterator() {
+
+        }
+
+        @Override
+        public Object next() {
+            return null;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public void remove() {
+
+        }
     }
 
     @Override
@@ -98,18 +122,9 @@ public class BinarySearchTree<T> implements Iterable, Collection {
     }
 
     @Override
-    public boolean remove(Object o) {
-        return false;
-    }
-
-    @Override
-    public boolean removeAll(Collection c) {
-        return false;
-    }
-
-    @Override
     public void clear() {
         root = null;
+        size = 0;
     }
 
     @Override
@@ -119,7 +134,7 @@ public class BinarySearchTree<T> implements Iterable, Collection {
 
     @Override
     public int size() {
-        return 0;
+        return size;
     }
 
     @Override
@@ -129,7 +144,7 @@ public class BinarySearchTree<T> implements Iterable, Collection {
 
     @Override
     public T[] toArray(Object[] a) {
-        return null;
+        return (T[])new  Object[0];
     }
 
     @Override
