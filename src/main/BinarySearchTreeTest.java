@@ -1,11 +1,8 @@
 package main;
 
-import static org.junit.Assert.*;
-import java.util.ArrayList;
+
 
 import org.junit.Test;
-
-import main.BinarySearchTree.Leaf;
 
 public class BinarySearchTreeTest {
 
