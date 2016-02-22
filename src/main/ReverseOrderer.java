@@ -4,24 +4,33 @@ package main;
  * Created by ted on 2/16/16.
  */
 class ReverseOrderer extends Orderer {
+    public BinarySearchTree.Node addNode(Object newValue, BinarySearchTree.LeafNode currentNode) {
+        if (((Comparable<Object>)newValue).compareTo(currentNode.value) >= 0) {
+            return new BinarySearchTree.Node(currentNode.value, new BinarySearchTree.LeafNode(newValue), null);
+        }
+        else {
+            return new BinarySearchTree.Node(currentNode.value, null, new BinarySearchTree.LeafNode(newValue));
+        }
+    }
+
     @Override
-    public BinarySearchTree.Leaf addLeaf(Object newValue, BinarySearchTree.Leaf currentLeaf) {
-        if (((Comparable<Object>)newValue).compareTo(currentLeaf.value) >= 0) {
-            if (currentLeaf.leftChild == null) {
-                currentLeaf.leftChild = new BinarySearchTree.Leaf(newValue, null, null);
+    public BinarySearchTree.Node addNode(Object newValue, BinarySearchTree.Node currentNode) {
+        if (((Comparable<Object>)newValue).compareTo(currentNode.value) >= 0) {
+            if (currentNode.leftChild == null) {
+                currentNode.leftChild = new BinarySearchTree.LeafNode(newValue);
             }
             else {
-                currentLeaf.leftChild = addLeaf(newValue, currentLeaf.leftChild);
+                currentNode.leftChild = addNode(newValue, currentNode.leftChild);
             }
         }
-        if (((Comparable<Object>)newValue).compareTo(currentLeaf.value) < 0) {
-            if (currentLeaf.rightChild == null) {
-                currentLeaf.rightChild = new BinarySearchTree.Leaf(newValue, null, null);
+        if (((Comparable<Object>)newValue).compareTo(currentNode.value) < 0) {
+            if (currentNode.rightChild == null) {
+                currentNode.rightChild = new BinarySearchTree.LeafNode(newValue);
             }
             else {
-                currentLeaf.rightChild = addLeaf(newValue, currentLeaf.rightChild);
+                currentNode.rightChild = addNode(newValue, currentNode.rightChild);
             }
         }
-        return currentLeaf;
+        return currentNode;
     }
 }

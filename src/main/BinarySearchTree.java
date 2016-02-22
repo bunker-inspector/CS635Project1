@@ -1,31 +1,31 @@
 package main;
 
-import java.util.AbstractCollection;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * Created by ted on 1/22/16.
  */
 public class BinarySearchTree<T> extends AbstractCollection implements Iterable {
 
-    private Leaf root;
+    private Node<T> root;
     private int size;
     private Orderer orderer;
 
-    static class Leaf {
+    static class Node<T> {
 
-        protected Object value = null;
-        protected Leaf leftChild = null;
-        protected Leaf rightChild = null;
+        protected Object value       = null;
+        protected Node<T> leftChild  = null;
+        protected Node<T> rightChild = null;
 
-        protected Leaf getNewLeaf(Object o) {
-            return new Leaf(o, null, null);
+        Node() {
+            value      = null;
+            leftChild  = null;
+            rightChild = null;
         }
 
-        Leaf (Object o, Leaf l, Leaf r) {
-            value = o;
-            leftChild = l;
+        Node(Object o, Node<T> l, Node<T> r) {
+            value      = o;
+            leftChild  = l;
             rightChild = r;
         }
 
@@ -58,6 +58,22 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
         }
     }
 
+    static class RootNode<T> extends Node {
+        RootNode (Object o) {
+            value = o;
+            leftChild = null;
+            rightChild = null;
+        }
+    }
+
+    static class LeafNode<T> extends Node {
+        LeafNode (Object o) {
+            value = o;
+            leftChild = null;
+            rightChild = null;
+        }
+    }
+
     BinarySearchTree () {
         root = null;
         size = 0;
@@ -71,37 +87,55 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
     }
 
     public boolean isEmpty() {
-        return (root == null);
+        return size == 0;
     }
 
-    public void addLeaf(Object newValue) {
+    public void addNode(Object newValue) {
         if (isEmpty()) {
-            root = new Leaf(newValue, null, null);
+            root = new RootNode<T>(newValue);
         }
         else {
-            orderer.addLeaf(newValue, root);
+            orderer.addNode(newValue, root);
         }
         size++;
     }
 
     @Override
-    public Iterator<T> iterator() {
-        return new BinarySearchTreeIterator();
+    public BinarySearchTreeIterator<T> iterator() {
+        return new BinarySearchTreeIterator<T>();
     }
 
-    private class BinarySearchTreeIterator implements Iterator{
-        BinarySearchTreeIterator() {
+    private class BinarySearchTreeIterator<T> implements Iterator{
+        Stack<Node<T>> encounterOrder;
 
+        private BinarySearchTreeIterator() {
+            encounterOrder = new Stack<>();
+
+            while (root != null) {
+                encounterOrder.push((Node<T>) root);
+                root = root.leftChild;
+            }
         }
 
-        @Override
-        public Object next() {
-            return null;
+        public Node<T> currentValue() {
+            return encounterOrder.peek();
         }
 
-        @Override
         public boolean hasNext() {
-            return false;
+            return !encounterOrder.isEmpty();
+        }
+
+        public Node<T> next() {
+            Node<T> currentNode = encounterOrder.pop();
+            Node<T> result = currentNode;
+            if (currentNode.rightChild != null) {
+                currentNode = currentNode.rightChild;
+                while (currentNode != null) {
+                    encounterOrder.push(currentNode);
+                    currentNode = currentNode.leftChild;
+                }
+            }
+            return result;
         }
 
         @Override
@@ -112,7 +146,7 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
 
     @Override
     public boolean add(Object o) {
-        addLeaf(o);
+        addNode(o);
         return true;
     }
 
@@ -141,30 +175,71 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
     }
 
     @Override
+    public String toString() {
+        BinarySearchTreeIterator iterator = iterator();
+
+        String result = "[" + iterator.next().value.toString();
+
+        while(iterator.hasNext()) {
+            result += ", " + iterator.next().value.toString();
+        }
+
+        return  result + "]";
+    }
+
+    public void printTypes() {
+        BinarySearchTreeIterator iterator = iterator();
+
+        while(iterator.hasNext()) {
+            System.out.println(iterator.next().toString());
+        }
+    }
+
+    @Override
     public Object[] toArray() {
-        return new Object[0];
+        Object[] result = new Object[size()];
+
+        BinarySearchTreeIterator iterator = new BinarySearchTreeIterator<>();
+
+        result[0] = iterator.currentValue();
+
+        for (int i = 0; iterator.hasNext(); i++) {
+            result[i] = iterator.next();
+        }
+
+        return  result;
     }
 
     @Override
     public T[] toArray(Object[] a) {
-        return (T[])new  Object[0];
-    }
+        if (a.length < size()) {
+            a = toArray();
+            return (T[])a;
+        }
 
-    @Override
-    public boolean retainAll(Collection c) {
-        return false;
-    }
+        BinarySearchTreeIterator iterator = new BinarySearchTreeIterator<>();
 
-    @Override
-    public boolean containsAll(Collection c) {
-        return false;
+        a[0] = iterator.currentValue();
+
+        for (int i = 0; iterator.hasNext(); i++) {
+            a[i] = iterator.next();
+        }
+
+        return (T[])a;
     }
 
     public void printInOrder() {
-        if (root != null)
-            root.printInOrder();
-        else
-            System.out.println("Root is null: Nothing to do.");
+        BinarySearchTreeIterator<T> bsti = iterator();
+
+       if(isEmpty()) {
+           System.out.println("Tree is empty. Nothing to do...");
+       }
+
+        System.out.println(bsti.currentValue());
+
+        while(bsti.hasNext()) {
+            System.out.println(bsti.next().value);
+        }
     }
 
     public void printVowelNodesReverseAlphabetic () {
@@ -174,19 +249,16 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
             System.out.println("Root is null: Nothing to do.");
     }
 
-    /**
-     *  Begin Strategy Pattern Classes
-     */
-
     public static void main(String[] args) {
         BinarySearchTree<String> b = new BinarySearchTree();
-        b.addLeaf("A");
-        b.addLeaf("B");
-        b.addLeaf("C");
-        b.addLeaf("d");
-        b.addLeaf("e");
-        b.addLeaf("f");
+        b.add("C");
+        b.add("B");
+        b.add("A");
+        b.add("e");
+        b.add("d");
+        b.add("f");
 
-        b.printInOrder();
+        //System.out.println(b.toString());
+        b.printTypes();
     }
 }

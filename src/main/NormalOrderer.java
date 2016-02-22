@@ -4,24 +4,35 @@ package main;
  * Created by ted on 2/16/16.
  */
 class NormalOrderer extends Orderer {
-    @Override
-    public BinarySearchTree.Leaf addLeaf(Object newValue, BinarySearchTree.Leaf currentLeaf) {
-        if (((Comparable<Object>)newValue).compareTo(currentLeaf.value) < 0) {
-            if (currentLeaf.leftChild == null) {
-                currentLeaf.leftChild = new BinarySearchTree.Leaf(newValue, null, null);
-            }
-            else {
-                currentLeaf.leftChild = addLeaf(newValue, currentLeaf.leftChild);
-            }
+    public BinarySearchTree.Node addNode(Object newValue, BinarySearchTree.LeafNode currentNode) {
+        if (((Comparable<Object>)newValue).compareTo(currentNode.value) < 0) {
+            return new BinarySearchTree.Node(currentNode.value, new BinarySearchTree.LeafNode(newValue), null);
         }
-        if (((Comparable<Object>)newValue).compareTo(currentLeaf.value) >= 0) {
-            if (currentLeaf.rightChild == null) {
-                currentLeaf.rightChild = new BinarySearchTree.Leaf(newValue, null, null);
-            }
-            else {
-                currentLeaf.rightChild = addLeaf(newValue, currentLeaf.rightChild);
-            }
+        else {
+            return new BinarySearchTree.Node(currentNode.value, null, new BinarySearchTree.LeafNode(newValue));
         }
-        return currentLeaf;
     }
+
+    @Override
+    public BinarySearchTree.Node addNode(Object newValue, BinarySearchTree.Node currentNode) {
+        if (((Comparable<Object>)newValue).compareTo(currentNode.value) < 0) {
+            if (currentNode.leftChild == null) {
+                currentNode.leftChild = new BinarySearchTree.LeafNode(newValue);
+            }
+            else {
+                currentNode.leftChild = addNode(newValue, currentNode.leftChild);
+            }
+        }
+        if (((Comparable<Object>)newValue).compareTo(currentNode.value) >= 0) {
+            if (currentNode.rightChild == null) {
+                currentNode.rightChild = new BinarySearchTree.LeafNode(newValue);
+            }
+            else {
+                currentNode.rightChild = addNode(newValue, currentNode.rightChild);
+            }
+        }
+        return currentNode;
+    }
+
+
 }
