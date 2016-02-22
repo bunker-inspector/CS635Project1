@@ -4,15 +4,6 @@ package main;
  * Created by ted on 2/16/16.
  */
 class NormalOrderer extends Orderer {
-    public BinarySearchTree.Node addNode(Object newValue, BinarySearchTree.LeafNode currentNode) {
-        if (((Comparable<Object>)newValue).compareTo(currentNode.value) < 0) {
-            return new BinarySearchTree.Node(currentNode.value, new BinarySearchTree.LeafNode(newValue), null);
-        }
-        else {
-            return new BinarySearchTree.Node(currentNode.value, null, new BinarySearchTree.LeafNode(newValue));
-        }
-    }
-
     @Override
     public BinarySearchTree.Node addNode(Object newValue, BinarySearchTree.Node currentNode) {
         if (((Comparable<Object>)newValue).compareTo(currentNode.value) < 0) {
@@ -20,7 +11,11 @@ class NormalOrderer extends Orderer {
                 currentNode.leftChild = new BinarySearchTree.LeafNode(newValue);
             }
             else {
-                currentNode.leftChild = addNode(newValue, currentNode.leftChild);
+                //turns existing LeafNodes to regular nodes since they are about to have children
+                currentNode.leftChild = addNode(newValue,
+                        new BinarySearchTree.Node(currentNode.leftChild.value,
+                                currentNode.leftChild.leftChild,
+                                currentNode.leftChild.rightChild));
             }
         }
         if (((Comparable<Object>)newValue).compareTo(currentNode.value) >= 0) {
@@ -28,7 +23,11 @@ class NormalOrderer extends Orderer {
                 currentNode.rightChild = new BinarySearchTree.LeafNode(newValue);
             }
             else {
-                currentNode.rightChild = addNode(newValue, currentNode.rightChild);
+                //turns existing LeafNodes to regular nodes since they are about to have children
+                currentNode.rightChild = addNode(newValue,
+                        new BinarySearchTree.Node(currentNode.rightChild.value,
+                                currentNode.rightChild.leftChild,
+                                currentNode.rightChild.rightChild));
             }
         }
         return currentNode;

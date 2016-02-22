@@ -258,7 +258,6 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
         b.add("d");
         b.add("f");
 
-        //System.out.println(b.toString());
-        b.printTypes();
+        System.out.println(b.toString());
     }
 }
