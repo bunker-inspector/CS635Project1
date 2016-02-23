@@ -11,6 +11,11 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
     private int size;
     private Orderer orderer;
 
+    /**
+     * Node Classes
+     * @param <T>
+     */
+
     static class Node<T> {
 
         protected Object value       = null;
@@ -74,6 +79,10 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
         }
     }
 
+    /**
+     * BinarySearchTree Classes and Collection function implementation
+     */
+
     BinarySearchTree () {
         root = null;
         size = 0;
@@ -101,11 +110,60 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
     }
 
     @Override
+    public boolean add(Object o) {
+        addNode(o);
+        return true;
+    }
+
+    @Override
+    public boolean addAll(Collection c) {
+        for (Object o : c) {
+            add(o);
+        }
+        return true;
+    }
+
+    @Override
+    public void clear() {
+        root = null;
+        size = 0;
+    }
+
+    @Override
+    public boolean contains(Object o) {
+        return false;
+    }
+
+    @Override
+    public int size() {
+        return size;
+    }
+
+    @Override
+    public String toString() {
+        BinarySearchTreeIterator iterator = new FindVowelDecorator((BinarySearchTreeIterator<String>) iterator());
+
+        String result = "[" + iterator.next().value.toString();
+
+        while(iterator.hasNext()) {
+            Node tmp = iterator.next();
+            if(tmp != null)
+                result += ", " + tmp.value.toString();
+        }
+
+        return  result + "]";
+    }
+
+    /**
+     * Iterator and Decorator Classes
+     */
+
+    @Override
     public BinarySearchTreeIterator<T> iterator() {
         return new BinarySearchTreeIterator<T>();
     }
 
-    private class BinarySearchTreeIterator<T> implements Iterator{
+    class BinarySearchTreeIterator<T> implements Iterator{
         Stack<Node<T>> encounterOrder;
 
         private BinarySearchTreeIterator() {
@@ -144,48 +202,72 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
         }
     }
 
-    @Override
-    public boolean add(Object o) {
-        addNode(o);
-        return true;
+    abstract class IteratorDecorator extends BinarySearchTreeIterator {
+        IteratorDecorator() {}
+
+        IteratorDecorator(BinarySearchTreeIterator bsti) {}
     }
 
-    @Override
-    public boolean addAll(Collection c) {
-        for (Object o : c) {
-            add(o);
-        }
-        return true;
-    }
+    class CapitalizeDecorator extends IteratorDecorator {
+        private BinarySearchTreeIterator<String> iterator;
 
-    @Override
-    public void clear() {
-        root = null;
-        size = 0;
-    }
+        CapitalizeDecorator(){};
 
-    @Override
-    public boolean contains(Object o) {
-        return false;
-    }
-
-    @Override
-    public int size() {
-        return size;
-    }
-
-    @Override
-    public String toString() {
-        BinarySearchTreeIterator iterator = iterator();
-
-        String result = "[" + iterator.next().value.toString();
-
-        while(iterator.hasNext()) {
-            result += ", " + iterator.next().value.toString();
+        CapitalizeDecorator(BinarySearchTreeIterator<String> i) {
+            iterator = i;
         }
 
-        return  result + "]";
+        @Override
+        public Node next() {
+            Node result = (Node)iterator.next();
+            result.value = ((String)result.value).toUpperCase();
+            return result;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
+
+        @Override
+        public Node currentValue() {
+            return iterator.currentValue();
+        }
     }
+
+    class FindVowelDecorator extends IteratorDecorator {
+        BinarySearchTreeIterator<String> iterator;
+
+        FindVowelDecorator(){}
+
+        FindVowelDecorator(BinarySearchTreeIterator<String> bsti){
+            iterator = bsti;
+        }
+
+        @Override
+        public Node next() {
+            Node result;
+
+            while(hasNext()) {
+                result = iterator.next();
+                if (((String)result.value).matches("[AEIOUaeiou]+.*"))
+                    return result;
+            }
+            return null;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
+
+        @Override
+        public Node currentValue() {
+            return iterator.currentValue();
+        }
+    }
+
+
 
     public void printTypes() {
         BinarySearchTreeIterator iterator = iterator();
@@ -250,7 +332,7 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
     }
 
     public static void main(String[] args) {
-        BinarySearchTree<String> b = new BinarySearchTree();
+        BinarySearchTree<String> b = new BinarySearchTree(new ReverseOrderer());
         b.add("C");
         b.add("B");
         b.add("A");
@@ -258,7 +340,6 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
         b.add("d");
         b.add("f");
 
-        //System.out.println(b.toString());
-        b.printTypes();
+        System.out.println(b.toString());
     }
 }
