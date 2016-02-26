@@ -7,9 +7,10 @@ import java.util.*;
  */
 public class BinarySearchTree<T> extends AbstractCollection implements Iterable {
 
-    private Node<T> root;
+    private RootNode<T> root;
     private int size;
     private Orderer orderer;
+    private static LeafNode nullNode = new LeafNode<>();
 
     /**
      * Node Classes
@@ -18,64 +19,65 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
 
     static class Node<T> {
 
-        protected Object value       = null;
-        protected Node<T> leftChild  = null;
-        protected Node<T> rightChild = null;
+        protected T value;
+        protected Node<T> leftChild;
+        protected Node<T> rightChild;
 
         Node() {
             value      = null;
-            leftChild  = null;
-            rightChild = null;
+            leftChild  = nullNode;
+            rightChild = nullNode;
         }
 
-        Node(Object o, Node<T> l, Node<T> r) {
-            value      = o;
+        Node(T t) {
+            value      = t;
+            leftChild  = nullNode;
+            rightChild = nullNode;
+        }
+
+        Node(T t, Node<T> l, Node<T> r) {
+            value      = t;
             leftChild  = l;
             rightChild = r;
         }
 
         private void printInOrder() {
-            if (leftChild != null) {
-                leftChild.printInOrder();
-            }
-
+            leftChild.printInOrder();
             System.out.println(value);
-
-            if (rightChild != null) {
-                rightChild.printInOrder();
-            }
+            rightChild.printInOrder();
         }
 
-        private void printVowelNodesReverseAlphabetic () {
-            if (rightChild != null) {
-                rightChild.printVowelNodesReverseAlphabetic();
-            }
+        Node<T> addNode(T newValue, Orderer o) {
+            return o.addNode(newValue, this);
+        }
 
-            String leafValue = (String) value;
-
-            if (leafValue.matches("[AEIOUaeiou]+.*")) {
-                System.out.println(value);
-            }
-
-            if (leftChild != null) {
-                leftChild.printVowelNodesReverseAlphabetic();
-            }
+        @Override
+        public String toString() {
+            return ", " + value.toString();
         }
     }
 
     static class RootNode<T> extends Node {
-        RootNode (Object o) {
-            value = o;
-            leftChild = null;
-            rightChild = null;
+        RootNode(T t) {
+            super(t);
         }
     }
 
     static class LeafNode<T> extends Node {
-        LeafNode (Object o) {
-            value = o;
-            leftChild = null;
+        private LeafNode() {
+            value      = null;
+            leftChild  = null;
             rightChild = null;
+        }
+
+        @Override
+        Node<T> addNode(Object newValue, Orderer o) {
+            return new Node(newValue);
+        }
+
+        @Override
+        public String toString() {
+            return "";
         }
     }
 
@@ -99,19 +101,19 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
         return size == 0;
     }
 
-    public void addNode(Object newValue) {
+    public void addNode(T newValue) {
         if (isEmpty()) {
             root = new RootNode<T>(newValue);
         }
         else {
-            orderer.addNode(newValue, root);
+            root.addNode(newValue, orderer);
         }
         size++;
     }
 
     @Override
     public boolean add(Object o) {
-        addNode(o);
+        addNode((T)o);
         return true;
     }
 
@@ -141,15 +143,16 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
 
     @Override
     public String toString() {
-        BinarySearchTreeIterator iterator = new FindVowelDecorator((BinarySearchTreeIterator<String>) iterator());
+        BinarySearchTreeIterator iterator = (BinarySearchTreeIterator<String>) iterator();
 
-        String result = "[" + iterator.next().value.toString();
+        String result = "[";
 
         while(iterator.hasNext()) {
             Node tmp = iterator.next();
-            if(tmp != null)
-                result += ", " + tmp.value.toString();
+            result += tmp.toString();
         }
+
+        result = result.replaceFirst(",", "");
 
         return  result + "]";
     }
@@ -169,9 +172,11 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
         private BinarySearchTreeIterator() {
             encounterOrder = new Stack<>();
 
-            while (root != null) {
-                encounterOrder.push((Node<T>) root);
-                root = root.leftChild;
+            Node<T> firstFinder = root;
+
+            while (firstFinder != null) {
+                encounterOrder.push(firstFinder);
+                firstFinder = firstFinder.leftChild;
             }
         }
 
@@ -250,7 +255,7 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
 
             while(hasNext()) {
                 result = iterator.next();
-                if (((String)result.value).matches("[AEIOUaeiou]+.*"))
+                if ((result.toString()).matches("[AEIOUaeiou]+.*"))
                     return result;
             }
             return null;
@@ -264,16 +269,6 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
         @Override
         public Node currentValue() {
             return iterator.currentValue();
-        }
-    }
-
-
-
-    public void printTypes() {
-        BinarySearchTreeIterator iterator = iterator();
-
-        while(iterator.hasNext()) {
-            System.out.println(iterator.next().toString());
         }
     }
 
@@ -324,21 +319,18 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
         }
     }
 
-    public void printVowelNodesReverseAlphabetic () {
-        if (!isEmpty())
-            root.printVowelNodesReverseAlphabetic();
-        else
-            System.out.println("Root is null: Nothing to do.");
-    }
-
     public static void main(String[] args) {
-        BinarySearchTree<String> b = new BinarySearchTree(new ReverseOrderer());
+        BinarySearchTree<String> b = new BinarySearchTree();
         b.add("C");
         b.add("B");
         b.add("A");
         b.add("e");
         b.add("d");
         b.add("f");
+        b.add("a");
+        b.add("E");
+        b.add("f");
+
 
         System.out.println(b.toString());
     }
