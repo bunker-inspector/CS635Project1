@@ -4,30 +4,12 @@ package main;
  * Created by ted on 2/16/16.
  */
 class ReverseOrderer<T> extends Orderer {
-    public BinarySearchTree.Node addNode(Object newValue, BinarySearchTree.Node currentNode) {
+    public BinarySearchTree.Node<T> addNode(Object newValue, BinarySearchTree.Node currentNode) {
         if (((Comparable<Object>)newValue).compareTo(currentNode.value) >= 0) {
-            if (currentNode.leftChild == null) {
-                currentNode.leftChild = new BinarySearchTree.Node(newValue);
-            }
-            else {
-                //turns existing LeafNodes to regular nodes since they are about to have children
-                currentNode.leftChild = addNode(newValue,
-                        new BinarySearchTree.Node(currentNode.leftChild.value,
-                                currentNode.leftChild.leftChild,
-                                currentNode.leftChild.rightChild));
-            }
+            currentNode.leftChild = currentNode.leftChild.addNode(newValue, this);
         }
         if (((Comparable<Object>)newValue).compareTo(currentNode.value) < 0) {
-            if (currentNode.rightChild == null) {
-                currentNode.rightChild = new BinarySearchTree.Node(newValue);
-            }
-            else {
-                //turns existing LeafNodes to regular nodes since they are about to have children
-                currentNode.rightChild = addNode(newValue,
-                        new BinarySearchTree.Node(currentNode.rightChild.value,
-                                currentNode.rightChild.leftChild,
-                                currentNode.rightChild.rightChild));
-            }
+            currentNode.rightChild = currentNode.rightChild.addNode(newValue, this);
         }
         return currentNode;
     }

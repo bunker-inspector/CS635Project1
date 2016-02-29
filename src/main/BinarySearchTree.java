@@ -41,13 +41,13 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
             rightChild = r;
         }
 
-        private void printInOrder() {
+        protected void printInOrder() {
             leftChild.printInOrder();
-            System.out.println(value);
+            System.out.print(value + " ");
             rightChild.printInOrder();
         }
 
-        Node<T> addNode(T newValue, Orderer o) {
+        Node<T> addNode(T newValue, Orderer<T> o) {
             return o.addNode(newValue, this);
         }
 
@@ -78,6 +78,10 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
         @Override
         public String toString() {
             return "";
+        }
+
+        public void printInOrder() {
+            return;
         }
     }
 
@@ -167,34 +171,34 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
     }
 
     class BinarySearchTreeIterator<T> implements Iterator{
-        Stack<Node<T>> encounterOrder;
+        Stack<Node<T>> encounteredNodes;
 
         private BinarySearchTreeIterator() {
-            encounterOrder = new Stack<>();
+            encounteredNodes = new Stack<>();
 
             Node<T> firstFinder = root;
 
             while (firstFinder != null) {
-                encounterOrder.push(firstFinder);
+                encounteredNodes.push(firstFinder);
                 firstFinder = firstFinder.leftChild;
             }
         }
 
         public Node<T> currentValue() {
-            return encounterOrder.peek();
+            return encounteredNodes.peek();
         }
 
         public boolean hasNext() {
-            return !encounterOrder.isEmpty();
+            return !encounteredNodes.isEmpty();
         }
 
         public Node<T> next() {
-            Node<T> currentNode = encounterOrder.pop();
+            Node<T> currentNode = encounteredNodes.pop();
             Node<T> result = currentNode;
             if (currentNode.rightChild != null) {
                 currentNode = currentNode.rightChild;
                 while (currentNode != null) {
-                    encounterOrder.push(currentNode);
+                    encounteredNodes.push(currentNode);
                     currentNode = currentNode.leftChild;
                 }
             }
@@ -278,10 +282,14 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
 
         BinarySearchTreeIterator iterator = new BinarySearchTreeIterator<>();
 
-        result[0] = iterator.currentValue();
-
-        for (int i = 0; iterator.hasNext(); i++) {
-            result[i] = iterator.next();
+        Node<T> n = null;
+        int i = 0;
+        while(iterator.hasNext()) {
+            n = iterator.next();
+            if(n.value != null) {
+                result[i] = n.value;
+                i++;
+            }
         }
 
         return  result;
@@ -296,28 +304,20 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
 
         BinarySearchTreeIterator iterator = new BinarySearchTreeIterator<>();
 
-        a[0] = iterator.currentValue();
-
-        for (int i = 0; iterator.hasNext(); i++) {
-            a[i] = iterator.next();
+        Node<T> n = null;
+        int i = 0;
+        while(iterator.hasNext()) {
+            n = iterator.next();
+            if(n.value != null) {
+                a[i] = n.value;
+                i++;
+            }
         }
 
         return (T[])a;
     }
 
-    public void printInOrder() {
-        BinarySearchTreeIterator<T> bsti = iterator();
-
-       if(isEmpty()) {
-           System.out.println("Tree is empty. Nothing to do...");
-       }
-
-        System.out.println(bsti.currentValue());
-
-        while(bsti.hasNext()) {
-            System.out.println(bsti.next().value);
-        }
-    }
+    public void printInOrder() { root.printInOrder(); }
 
     public static void main(String[] args) {
         BinarySearchTree<String> b = new BinarySearchTree();
@@ -331,7 +331,6 @@ public class BinarySearchTree<T> extends AbstractCollection implements Iterable 
         b.add("E");
         b.add("f");
 
-
-        System.out.println(b.toString());
+        b.printInOrder();
     }
 }
